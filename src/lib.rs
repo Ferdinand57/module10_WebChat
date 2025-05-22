@@ -1,5 +1,9 @@
 #![recursion_limit = "512"]
 
+pub mod services{
+    pub mod websocket;
+}
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
