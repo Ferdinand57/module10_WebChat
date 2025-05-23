@@ -2,6 +2,7 @@
 
 pub mod services{
     pub mod websocket;
+    pub mod event_bus;
 }
 
 use std::cell::RefCell;
