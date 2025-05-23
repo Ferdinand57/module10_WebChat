@@ -36,8 +36,27 @@ struct WebSocketMessage {
 #[derive(Clone)]
 struct UserProfile {
     name: String,
-    avatar: String,
+    initials: String,  // Changed from avatar
+    bg_color: String,  // New field
 }
+
+impl Chat {
+    // Helper to create initials from username
+    fn get_initials(username: &str) -> String {
+        username.split_whitespace()
+            .take(2)
+            .filter_map(|word| word.chars().next())
+            .map(|c| c.to_ascii_uppercase())
+            .collect()
+    }
+
+    // Helper to generate consistent color from username
+    fn username_to_color(username: &str) -> String {
+        let hash = username.chars().fold(0, |acc, c| c as usize + acc);
+        format!("#{:06X}", hash % 0xFFFFFF)
+    }
+}
+
 
 pub struct Chat {
     users: Vec<UserProfile>,
@@ -91,11 +110,8 @@ impl Component for Chat {
                             .iter()
                             .map(|u| UserProfile {
                                 name: u.into(),
-                                avatar: format!(
-                                    "https://avatars.dicebear.com/api/adventurer-neutral/{}.svg",
-                                    u
-                                )
-                                .into(),
+                                initials: Chat::get_initials(u),  // Generate initials
+                                bg_color: Chat::username_to_color(u),  // Generate color
                             })
                             .collect();
                         return true;
@@ -147,7 +163,10 @@ impl Component for Chat {
                             html!{
                                 <div class="flex m-3 bg-white rounded-lg p-2">
                                     <div>
-                                        <img class="w-12 h-12 rounded-full" src={u.avatar.clone()} alt="avatar"/>
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center" 
+                                            style={format!("background: {}", u.bg_color)}>
+                                            <span class="text-white font-bold">{&u.initials}</span>
+                                        </div>
                                     </div>
                                     <div class="flex-grow p-3">
                                         <div class="flex text-xs justify-between">
@@ -170,7 +189,10 @@ impl Component for Chat {
                                 let user = self.users.iter().find(|u| u.name == m.from).unwrap();
                                 html!{
                                     <div class="flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg ">
-                                        <img class="w-8 h-8 rounded-full m-3" src={user.avatar.clone()} alt="avatar"/>
+                                        <div class="w-8 h-8 rounded-full m-3 flex items-center justify-center"
+                                            style={format!("background: {}", user.bg_color)}>
+                                            <span class="text-white text-xs font-bold">{&user.initials}</span>
+                                        </div>
                                         <div class="p-3">
                                             <div class="text-sm">
                                                 {m.from.clone()}
